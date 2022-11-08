@@ -85,6 +85,10 @@ Extra Args:
 }
 
 fn do(cmd Command) ! {
+  $if windows {
+    return error('Windows not implemented yet')
+  }
+
   mut flags := cmd.flags.clone()
 
   filepath := flags.get_string('input')!

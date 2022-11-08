@@ -23,7 +23,7 @@ pub mut:
 }
 
 // load shellcode binary into memory
-pub fn (mut sc Shellcode) load(path string) ?Error {
+pub fn (mut sc Shellcode) load(path string) ? {
   sc.size = os.file_size(path)
   if sc.size == 0 {
     return error('Unable to get file size')
@@ -67,6 +67,7 @@ pub fn (mut sc Shellcode) load(path string) ?Error {
                     mapping,
                     -1, 0)
 
+
   if sc.body == voidptr(-1) {
     return error('Error while mapping memory')
   }
@@ -97,7 +98,7 @@ pub fn (mut sc Shellcode) load(path string) ?Error {
     println('Shellcode mapped at: 0x${sc.body:X} (length: $sc.size)')
   }
 
-  return none
+  return
 }
 
 // run shellcode
