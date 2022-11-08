@@ -79,23 +79,24 @@ Extra Args:
     eprint(app.help_message())
     exit(1)
   }
+
   app.setup()
   app.parse(os.args)
 }
 
-fn do(cmd Command) ? {
+fn do(cmd Command) ! {
   mut flags := cmd.flags.clone()
 
-  filepath := flags.get_string('input')?
+  filepath := flags.get_string('input')!
   if !os.exists(filepath) || !os.is_readable(filepath) {
     return error("Input file does not exists or can't be read")
   }
 
   mut sc := shellcode.Shellcode{
-    @return: flags.get_bool('ret')?,
-    interrupt: flags.get_bool('int')?,
-    offset: flags.get_string('offset')?.u32()
-    addr: flags.get_string('addr')?.u64()
+    @return: flags.get_bool('ret')!,
+    interrupt: flags.get_bool('int')!,
+    offset: flags.get_string('offset')!.u32()
+    addr: flags.get_string('addr')!.u64()
   }
 
   if cmd.args.len > 0 {
@@ -119,12 +120,12 @@ fn do(cmd Command) ? {
     sc.unload() or { println(err) }
   }
 
-  if flags.get_bool('out')? {
+  if flags.get_bool('out')! {
     sc.print(0, true)
     return
   }
 
-  if !flags.get_bool('nofork')? {
+  if !flags.get_bool('nofork')! {
     pid := os.fork()
     if pid == 0 {
       sc.exec()

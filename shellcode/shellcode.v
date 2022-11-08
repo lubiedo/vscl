@@ -23,7 +23,7 @@ pub mut:
 }
 
 // load shellcode binary into memory
-pub fn (mut sc Shellcode) load(path string) ? {
+pub fn (mut sc Shellcode) load(path string) ?Error {
   sc.size = os.file_size(path)
   if sc.size == 0 {
     return error('Unable to get file size')
@@ -77,7 +77,7 @@ pub fn (mut sc Shellcode) load(path string) ? {
     pos += inst.size
   }
 
-  data := os.read_file(path)?
+  data := os.read_file(path) or { return err }
   unsafe {
     buf := data.bytes()
 
@@ -96,6 +96,8 @@ pub fn (mut sc Shellcode) load(path string) ? {
   $if debug {
     println('Shellcode mapped at: 0x${sc.body:X} (length: $sc.size)')
   }
+
+  return none
 }
 
 // run shellcode
@@ -147,7 +149,7 @@ pub fn (sc &Shellcode) print(offset u32, c_style bool) {
     if c_style {
       out += 'unsigned char shellcode[] = {\n  '
       for i in 0 .. sc.size {
-        out += '0x${sc.body[i]:02x}'
+        out += '0x{sc.body[i]:02x}'
         out += if i+1 < sc.size { ', ' } else { '\n' }
         if (i+1) % 8 == 0  && i+1 < sc.size {
           out += '\n  '
@@ -157,7 +159,7 @@ pub fn (sc &Shellcode) print(offset u32, c_style bool) {
       out += 'unsigned int shelcode = $sc.size;\n'
     } else {
       for i in 0 .. sc.size {
-          s := '${sc.body[i]:02X} '
+          s := '{sc.body[i]:02X} '
           if s == '00 ' {
             out += bold(red(s))
           } else {
